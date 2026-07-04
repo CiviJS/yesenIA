@@ -19,4 +19,22 @@ class ProductService
         });
     }
 
+    public function softDelete(int $id)
+    {
+        $product = Product::find($id);
+        if (!$product) {
+            return false;
+        }
+        
+        $product->delete();
+        return true;
+    }
+    public function updateProduct(array $data, Product $product)
+    {
+        return DB::transaction(function () use ($data, $product) {
+            $product->update($data);
+        });
+    }
+
+
 }

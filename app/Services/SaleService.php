@@ -5,6 +5,8 @@ use App\Models\Sale;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Events\OrderCancelled;
+use App\Events\OrderRestored;
 
 
 class SaleService
@@ -13,7 +15,8 @@ class SaleService
     {
         return
             DB::transaction(function () use ($data) {
-                $sale = Sale::create([]);
+
+                $sale = Sale::create();
 
                 foreach ($data['items'] as $item) {
                     $product = Product::where('id', $item['product_id'])->lockForUpdate()->firstOrFail();
@@ -34,8 +37,33 @@ class SaleService
     }
     public function getSales(int $perPage = 10): LengthAwarePaginator
     {
-        return Sale::with('client', 'items.product')->paginate($perPage);
+        return Sale::withTrashed()->with('items.product')->paginate($perPage);
     }
 
+    public function softDelete(int $id)
+    {
+        $sale = Sale::find($id);
+        if (!$sale) {
+            return false;
+        }
+        return DB::transaction(function () use ($sale) {
+            $sale->delete();
+            OrderCancelled::dispatch($sale);
+            return true; 
+        });
+      
+    }
+
+    public function restore($id):bool
+    {
+        $sale = Sale::withTrashed()->find($id);
+         if (!$sale) return false;
+        return DB::transaction(function () use ($sale) {
+            $sale->restore();
+            OrderRestored::dispatch($sale);
+            return true;
+        });
+
+    }
 
 }

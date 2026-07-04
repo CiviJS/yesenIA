@@ -64,7 +64,7 @@ class ProductCategoryController extends Controller
             return back()->withInput()->withErrors(['error' => 'Ocurrio un error inesperado al actualizar...']);
         }
     }
-
+  
     public function softDelete($id)
     {
         try {

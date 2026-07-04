@@ -1,22 +1,32 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ProductController;
 Route::view('/', 'welcome')->name('home');
 
-// Nombre de la ruta, según el método es la vista a mostrar, si es get o post o delete
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 
-    // Rutas de Ventas (Estructura correcta en plural)
+    // Rutas de Ventas
     Route::get('sales', [SaleController::class, 'index'])->name('sales.index');
     Route::get('sales/create', [SaleController::class, 'create'])->name('sales.create');
     Route::post('sales', [SaleController::class, 'store'])->name('sales.store');
+    Route::delete('sales/{sale}',[SaleController::class , 'softDelete'])->name('sales.delete');
+    Route::put('sales/{sale}/restore', [SaleController::class, 'restore'])->name('sales.restore');
 
-    // Rutas de Clientes (Corregido a plural 'clients.index')
+    // Rutas de Deudas
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::delete('/orders/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::put('/orders/{order}/restore', [OrderController::class, 'restore'])->name('orders.restore');
+
+    // Rutas de Clientes 
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
@@ -26,6 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class , 'store'])->name('products.store');
+    Route::delete('/products/{product}', [ProductController::class , 'softDelete'])->name('products.delete');
+    Route::get('/products/{product}/edit', [ProductController::class , 'edit'])->name('products.edit');
+    Route::put('/products/{product}' , [ProductController::class, 'update'])->name('products.update');
+
 
     Route::get('/productsCategory', [ProductCategoryController::class, 'index'])->name('products-category.index');
     Route::get('/productsCategory/{productCategory}/edit', [ProductCategoryController::class, 'edit'])->name('products-category.edit');
