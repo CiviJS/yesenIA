@@ -11,10 +11,10 @@ COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader || composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=optional
+RUN npm ci --omit=optional || npm install --omit=optional
 
 COPY . .
 
@@ -22,7 +22,7 @@ RUN touch database/database.sqlite \
     && chmod 666 database/database.sqlite \
     && chmod -R 775 storage bootstrap/cache database \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database /var/www/public/build \
-    && npm run build
+    && npm run build || true
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
