@@ -1,13 +1,9 @@
 FROM php:8.3-fpm
 
-ARG NODE_VERSION=20
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl libpng-dev libonig-dev libxml2-dev zip unzip libicu-dev libzip-dev libsqlite3-dev \
-    && curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && docker-php-ext-configure gd --with-external-gd \
-    && docker-php-ext-install pdo_sqlite mbstring exif pcntl bcmath gd intl zip \
+    git curl ca-certificates libpng-dev libonig-dev libxml2-dev zip unzip libicu-dev libzip-dev libsqlite3-dev \
+    && apt-get install -y --no-install-recommends nodejs npm \
+    && docker-php-ext-install pdo_sqlite mbstring exif pcntl bcmath intl zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
@@ -28,6 +24,9 @@ RUN touch database/database.sqlite \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database /var/www/public/build \
     && npm run build
 
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 9000
 
-CMD ["php-fpm"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
