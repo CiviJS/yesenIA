@@ -18,12 +18,14 @@ services:
     command: sh -c "php artisan key:generate --force || true && touch database/database.sqlite && chmod 666 database/database.sqlite && php artisan migrate --force && php-fpm"
     networks:
       - yesenia-network
+    expose:
+      - "9000"
 
   nginx:
     image: nginx:alpine
     container_name: yesenia-nginx
     ports:
-      - "8000:80"
+      - "0.0.0.0:8000:80"
     volumes:
       - .:/var/www
       - ./docker/conf:/etc/nginx/conf.d:ro

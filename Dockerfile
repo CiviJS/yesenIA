@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && docker-php-ext-configure gd --with-external-gd \
-    && docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd intl zip \
+    && docker-php-ext-install pdo_sqlite mbstring exif pcntl bcmath gd intl zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
@@ -24,8 +24,9 @@ COPY . .
 
 RUN touch database/database.sqlite \
     && chmod 666 database/database.sqlite \
-    && npm run build \
-    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/public/build /var/www/database
+    && chmod -R 775 storage bootstrap/cache database \
+    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database /var/www/public/build \
+    && npm run build
 
 EXPOSE 9000
 
