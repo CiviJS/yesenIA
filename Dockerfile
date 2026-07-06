@@ -13,7 +13,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-RUN touch /var/www/database/database.sqlite && \
+RUN mkdir -p /var/www/database && \
+    touch /var/www/database/database.sqlite && \
     chown -R www-data:www-data /var/www/database && \
     chmod -R 775 /var/www/database
 
