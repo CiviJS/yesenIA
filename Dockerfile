@@ -9,14 +9,15 @@ RUN echo "[global]" > /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo "listen = 0.0.0.0:9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
 WORKDIR /var/www
-
-
 COPY . .
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 RUN composer install --no-dev --optimize-autoloader
+RUN chown -R www-data:www-data /var/www/vendor
 
 RUN npm install && npm run build
+RUN chown -R www-data:www-data /var/www
 
 RUN mkdir -p /var/www/database /var/www/storage /var/www/bootstrap/cache && \
     chown -R www-data:www-data /var/www/database /var/www/storage /var/www/bootstrap/cache && \

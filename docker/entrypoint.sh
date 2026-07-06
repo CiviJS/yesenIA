@@ -8,6 +8,12 @@ fi
 if [ ! -f /var/www/database/database.sqlite ]; then
     touch /var/www/database/database.sqlite
 fi
+if [ -f /var/www/vendor/autoload.php ]; then
+    echo "Ejecutando migraciones..."
+    php artisan migrate --force
+else
+    echo "Error: vendor/autoload.php no encontrado"
+fi
 
 chown -R www-data:www-data /var/www/database
 chmod -R 775 /var/www/database
