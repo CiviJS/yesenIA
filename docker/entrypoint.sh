@@ -1,27 +1,25 @@
 #!/bin/sh
 set -e
 
-if [ ! -d /var/www/database ]; then
-    mkdir -p /var/www/database
+
+if [ ! -f /var/www/vendor/autoload.php ]; then
+    echo "ERROR: vendor/autoload.php no encontrado. Ejecutando composer install de emergencia..."
+    cd /var/www && composer install --no-dev --optimize-autoloader
 fi
 
+mkdir -p /var/www/database
 if [ ! -f /var/www/database/database.sqlite ]; then
     touch /var/www/database/database.sqlite
 fi
-if [ -f /var/www/vendor/autoload.php ]; then
-    echo "Ejecutando migraciones..."
-    php artisan migrate --force
-else
-    echo "Error: vendor/autoload.php no encontrado"
-fi
 
-chown -R www-data:www-data /var/www/database
-chmod -R 775 /var/www/database
-echo "Ejecutando migraciones ACTUALIZADO OJO SINO SALE ESTO ENTONCES NO ESTA USANDO ESTA VERSION."
+echo "Aplicando permisos..."
+chown -R www-data:www-data /var/www/database /var/www/storage /var/www/bootstrap/cache
+chmod -R 775 /var/www/database /var/www/storage /var/www/bootstrap/cache
+
+echo "Ejecutando tareas de Laravel..."
 php artisan migrate --force
-
-echo "Limpiando cache..."
 php artisan config:clear
+php artisan key:generate
 
 echo "Iniciando PHP-FPM..."
-php-fpm -F
+exec php-fpm -F
