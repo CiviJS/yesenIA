@@ -10,7 +10,7 @@ RUN echo "[global]" > /usr/local/etc/php-fpm.d/zz-docker.conf && \
     sed -i 's/;error_log = log\/php-fpm.log/error_log = \/proc\/self\/fd\/2/g' /usr/local/etc/php-fpm.conf
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
+RUN composer install --no-dev --optimize-autoloader
 WORKDIR /var/www
 
 RUN mkdir -p /var/www/database && \
