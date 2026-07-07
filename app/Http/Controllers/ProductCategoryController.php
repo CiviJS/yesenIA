@@ -65,23 +65,41 @@ class ProductCategoryController extends Controller
         }
     }
   
-    public function softDelete($id)
-    {
-        try {
-
-            $isDeleted = $this->productCategoryService->softDelete((int) $id);
-            if (!$isDeleted) {
-                return redirect()->route('products-category.index')->with('error', 'La categoria ya no existe o fue eliminada por otro usuario');
-            }
-            return redirect()->route('products-category.index')->with('success', 'Categoria eliminada correctamente');
-        } catch (Exception $e) {
-            $this->logError('fallo al eliminar critico al eliminar... : ', $e);
-            return redirect()
-                ->route('products-category.index')
-                ->with('error', 'Ocurrió un error interno en el servidor al intentar eliminar la categoría.');
-
+public function softDelete($id)
+{
+    try {
+        $isDeleted = $this->productCategoryService->softDelete((int) $id);
+        
+        if (!$isDeleted) {
+            return redirect()->route('products-category.index')->with('error', 'La categoría ya no existe o fue eliminada por otro usuario');
         }
+
+       
+        $currentPage = request()->get('page', 1);
+
+       
+        if ($currentPage > 1) {
+           
+            $totalCategories = \App\Models\ProductCategory::count(); 
+            
+         
+            $perPage = 10; 
+    
+            if ($totalCategories <= ($currentPage - 1) * $perPage) {
+                return redirect()->route('products-category.index')->with('success', 'Categoría eliminada correctamente');
+            }
+        }
+
+       
+        return redirect()->back()->with('success', 'Categoría eliminada correctamente');
+
+    } catch (Exception $e) {
+        $this->logError('Fallo crítico al eliminar categoría: ', $e);
+        return redirect()
+            ->route('products-category.index')
+            ->with('error', 'Ocurrió un error interno en el servidor al intentar eliminar la categoría.');
     }
+}
 
     private function isUniqueConstraintError(QueryException $e): bool
     {

@@ -40,9 +40,8 @@ class SaleService
         return Sale::withTrashed()->with('items.product')->paginate($perPage);
     }
 
-    public function softDelete(int $id)
+    public function softDelete(Sale $sale)
     {
-        $sale = Sale::find($id);
         if (!$sale) {
             return false;
         }
@@ -54,10 +53,10 @@ class SaleService
       
     }
 
-    public function restore($id):bool
+    public function restore(Sale $sale):bool
     {
-        $sale = Sale::withTrashed()->find($id);
-         if (!$sale) return false;
+         if (!$sale->trashed()) return false;
+         
         return DB::transaction(function () use ($sale) {
             $sale->restore();
             OrderRestored::dispatch($sale);

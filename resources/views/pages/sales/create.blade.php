@@ -47,7 +47,7 @@
                             @foreach ($products as $product)
                                 <flux:select.option value="{{ $product->id }}"
                                     :selected="old('items.0.product_id') == $product->id">
-                                    {{ $product->name }} — {{ number_format($product->price, 0, ',', '.') }}
+                                    {{ $product->name }} — quedan: {{ number_format($product->stock, 0, ',', '.') }}
                                 </flux:select.option>
                             @endforeach
                         </flux:select>

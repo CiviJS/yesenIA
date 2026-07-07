@@ -17,14 +17,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('sales/create', [SaleController::class, 'create'])->name('sales.create');
     Route::post('sales', [SaleController::class, 'store'])->name('sales.store');
     Route::delete('sales/{sale}',[SaleController::class , 'softDelete'])->name('sales.delete');
-    Route::put('sales/{sale}/restore', [SaleController::class, 'restore'])->name('sales.restore');
+    Route::put('sales/{sale}/restore', [SaleController::class, 'restore'])->name('sales.restore')->withTrashed();
 
     // Rutas de Deudas
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::delete('/orders/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::put('/orders/{order}/restore', [OrderController::class, 'restore'])->name('orders.restore');
+    Route::put('/orders/{order}/restore', [OrderController::class, 'restore'])->name('orders.restore')->withTrashed();
 
     // Rutas de Clientes 
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');

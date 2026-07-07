@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    use SoftDeletes;
     protected $casts = [
         'total_amount' => 'decimal:2'
     ];
@@ -16,7 +18,7 @@ class Order extends Model
 
     public function client()
     {
-        return $this->belongsTo(Client::class , 'client_id');
+        return $this->belongsTo(Client::class, 'client_id');
     }
     public function items()
     {
@@ -25,5 +27,9 @@ class Order extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class, 'order_id');
+    }
+    
+    public function getStatus(){
+        return !$this->trashed();
     }
 }

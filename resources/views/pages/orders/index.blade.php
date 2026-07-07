@@ -33,11 +33,13 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($orders as $order)
-                <flux:card class="flex flex-col gap-4 {{ (bool) $order->is_canceled ? 'opacity-60' : '' }}">
+                {{-- Si getStatus() es false (está eliminada/trashed), se le aplica la opacidad --}}
+                <flux:card class="flex flex-col gap-4 {{ !$order->getStatus() ? 'opacity-60' : '' }}">
                     <div class="flex justify-between items-center">
                         <flux:subheading># Deuda: {{ $order->id }}</flux:subheading>
-                        <flux:badge color="{{ (bool) $order->is_canceled ? 'red' : 'green' }}" size="sm">
-                            {{ (bool) $order->is_canceled ? 'Cancelada' : 'Pendiente' }}
+                        {{-- Si getStatus() es true es Pendiente (green), si es false es Cancelada (red) --}}
+                        <flux:badge color="{{ $order->getStatus() ? 'green' : 'red' }}" size="sm">
+                            {{ $order->getStatus() ? 'Pendiente' : 'Cancelada' }}
                         </flux:badge>
                     </div>
 
@@ -66,13 +68,15 @@
                     </div>
 
                     <div class="flex justify-end pt-2">
-                        @if (! (bool) $order->is_canceled)
-                            <form action="{{ route('orders.cancel', $order) }}" method="POST" onsubmit="return confirm('¿Seguro?');">
+                      
+                        @if ($order->getStatus())
+                            <form action="{{ route('orders.cancel', $order) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas cancelar esta deuda?');">
                                 @csrf @method('DELETE')
                                 <flux:button type="submit" variant="ghost" icon="trash" class="text-red-500">Cancelar</flux:button>
                             </form>
+
                         @else
-                            <form action="{{ route('orders.restore', $order) }}" method="POST">
+                            <form action="{{ route('orders.restore', $order) }}" method="POST"  onsubmit="return confirm('¿Seguro que deseas restaurar esta deuda?');">
                                 @csrf @method('PUT')
                                 <flux:button type="submit" variant="ghost" icon="arrow-path" class="text-green-500">Restaurar</flux:button>
                             </form>

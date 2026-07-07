@@ -9,14 +9,19 @@ class RestoreProductStock
 {
     public function handle(OrderCancelled $event): void
     {
-        $order = $event->orderable->load('items.product');
 
-        if (! empty($order->is_canceled)) {
+        $order = $event->orderable->load('items.product');
+               
+       
+        if ($order->trashed()) {
+
             foreach ($order->items as $item) {
-                $item->product->increment('stock', $item->quantity);
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                }
             }
 
-            Log::info('Operación cancelada, productos restaurados: ' . get_class($event->orderable) . ' ID: ' . $event->orderable->id);
+            Log::info('Operación cancelada (Soft Deleted), productos restaurados: ' . get_class($event->orderable) . ' ID: ' . $order->id);
         }
     }
 }

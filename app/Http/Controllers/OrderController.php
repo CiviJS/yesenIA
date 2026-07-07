@@ -23,6 +23,7 @@ class OrderController extends Controller
             $orders = $this->orderService->getOrders();
 
             return view('pages.orders.index', compact('orders'));
+
         } catch (Exception $e) {
             Log::error('Fallo critico al cargar las deudas', [
                 'error' => $e->getMessage(),
@@ -30,12 +31,19 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
+            
+            if (url()->previous() === url()->current()) {
+                return redirect()->route('dashboard')->withErrors(['error' => 'Hubo un problema al cargar las deudas.']);
+            }
+
             return back()->withErrors(['error' => 'Hubo un problema al cargar las deudas.']);
         }
     }
 
     public function create()
     {
+
+        //ojo con esto xd , convertirlo a inyecicon de dependencias 
         $clients = app(\App\Services\ClientService::class)->getClients(100);
         $products = app(\App\Services\ProductService::class)->getProducts();
 
@@ -62,11 +70,11 @@ class OrderController extends Controller
     public function cancel(Order $order)
     {
         try {
-            $isCanceled = $this->orderService->cancelOrder($order);
-
-            if (! $isCanceled) {
+    
+            if (!$order->getStatus()) {
                 return redirect()->route('orders.index')->with('error', 'La deuda ya estaba cancelada o no existe.');
             }
+            $this->orderService->cancelOrder($order);
 
             return redirect()->route('orders.index')->with('success', 'Deuda cancelada correctamente.');
         } catch (Exception $e) {
@@ -83,12 +91,14 @@ class OrderController extends Controller
     public function restore(Order $order)
     {
         try {
-            $isRestored = $this->orderService->restoreOrder($order);
-
-            if (! $isRestored) {
+            //si la deuda esta activa
+            if ($order->getStatus()) {
                 return redirect()->route('orders.index')->with('error', 'La deuda no se puede restaurar en este momento.');
             }
 
+           $this->orderService->restoreOrder($order);
+
+          
             return redirect()->route('orders.index')->with('success', 'Deuda restaurada correctamente.');
         } catch (Exception $e) {
             Log::error("Error al restaurar deuda ID {$order->id}: " . $e->getMessage(), [
