@@ -10,8 +10,4 @@ fi
 
 php artisan migrate --force
 php artisan config:clear
-
-php artisan livewire:publish 
-php artisan flux:publish 
-
 exec php artisan serve --host=0.0.0.0 --port=8080
