@@ -14,4 +14,4 @@ php artisan config:clear
 php artisan livewire:publish 
 php artisan flux:publish 
 
-exec php -S 0.0.0.0:8080 -t public
+exec php artisan serve --host=0.0.0.0 --port=8080
