@@ -11,5 +11,7 @@ fi
 php artisan migrate --force
 php artisan config:clear
 
+php artisan livewire:publish --assets
+php artisan flux:publish --assets
 
-exec php -S 0.0.0.0:8080 -t public public/index.php
+exec php -S 0.0.0.0:8080 -t public
