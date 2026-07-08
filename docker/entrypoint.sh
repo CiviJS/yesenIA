@@ -12,4 +12,4 @@ php artisan migrate --force
 php artisan config:clear
 
 
-exec php -S 0.0.0.0:8080 -t public
+exec php -S 0.0.0.0:8080 -t public public/index.php
