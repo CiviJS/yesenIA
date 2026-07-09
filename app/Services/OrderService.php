@@ -40,6 +40,7 @@ class OrderService
         });
     }
 
+    //Corregido : problema de N+1 
     public function createOrder(array $data): Order
     {
         return DB::transaction(function () use ($data) {
@@ -63,12 +64,11 @@ class OrderService
 
                 $quantity = (int) $item['quantity'];
 
-                // 3. Validación de stock
+    
                 if ($product->stock < $quantity) {
                     throw new \Exception("Stock Insuficiente para: {$product->name}");
                 }
 
-                // 4. Crear el ítem
                 $order->items()->create([
                     'product_id' => $product->id,
                     'quantity' => $quantity,
@@ -77,13 +77,12 @@ class OrderService
                     'orderable_type' => Order::class,
                 ]);
 
-                // 5. Decrementar stock
                 $product->decrement('stock', $quantity);
 
                 $newTotal += ($quantity * ($item['unit_price'] ?? $product->price));
             }
 
-            // 6. Actualizar el total (Sumando a lo que ya existía si la orden ya tenía deuda)
+            
             $order->increment('total_amount', $newTotal);
 
             return $order;
