@@ -8,9 +8,8 @@ if [ ! -f /var/www/database/database.sqlite ]; then
 fi
 
 
-php artisan migrate --force
+php artisan migrate:fresh --seed
 php artisan config:clear
-
 npm run build
 
 exec php artisan serve --host=0.0.0.0 --port=8080
