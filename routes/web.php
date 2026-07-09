@@ -31,7 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Rutas de Order Items
     Route::put('/order/item/{orderItem}', [OrderController::class, 'restoreOrderItem'])->name('orderItem.restore')->withTrashed();
-    Route::delete('/order/item{orderItem}', [OrderController::class, 'cancelOrderItem'])->name('orderItem.cancel');
+    Route::delete('/order/item/{orderItem}', [OrderController::class, 'cancelOrderItem'])->name('orderItem.cancel');
 
 
     //Rutas de Pagos

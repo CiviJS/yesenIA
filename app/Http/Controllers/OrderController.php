@@ -6,16 +6,18 @@ use App\Http\Requests\Order\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\OrderService;
+use App\Services\ClientService; // Asegúrate de importar esto
+use App\Services\ProductService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    protected OrderService $orderService;
-
-    public function __construct(OrderService $orderService)
-    {
-        $this->orderService = $orderService;
+    public function __construct(
+        protected OrderService $orderService,
+        protected ClientService $clientService,
+        protected ProductService $productService
+    ) {
     }
 
     public function index()
@@ -47,12 +49,11 @@ class OrderController extends Controller
 
     public function create()
     {
-
-        //ojo con esto xd , convertirlo a inyecicon de dependencias 
-        $clients = app(\App\Services\ClientService::class)->getClients(100);
-        $products = app(\App\Services\ProductService::class)->getProducts();
-
-        return view('pages.orders.create', compact('clients', 'products'));
+ 
+        return view('pages.orders.create', [
+            'clients' => $this->clientService->getClients(100),
+            'products' => $this->productService->getProducts()
+        ]);
     }
 
     public function store(StoreOrderRequest $request)
@@ -77,11 +78,11 @@ class OrderController extends Controller
     {
         try {
             $this->orderService->restoreOrderItem($orderItem);
-            return redirect()->back()->with('sucess' , 'producto cancelado correctamente');
-        } catch (Exception $e) {
-            Log::error('error al cancelar producto de la deuda');
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un problema al cancelar un producto de la deuda.']);
 
+            return redirect()->back()->with('success', 'Producto restaurado correctamente.');
+        } catch (Exception $e) {
+            Log::error('Error al restaurar producto: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un problema al restaurar el producto.']);
         }
     }
 
@@ -110,24 +111,19 @@ class OrderController extends Controller
     public function cancelOrderItem(OrderItem $orderItem)
     {
         try {
-            if ($orderItem->getStatus()) {
-                return redirect()->route('orders.index')->with('errors', 'La deuda no se puede restaurar en este momento.');
+            if (!$orderItem->getStatus()) {
+                return redirect()->back()->withErrors(['error' => 'El producto ya está cancelado.']);
             }
-
+            
             $this->orderService->cancelOrderItem($orderItem);
-            return back()->with('success' , 'producto restaurado correctamente');
+            return back()->with('success', 'Producto cancelado correctamente.');
         } catch (Exception $e) {
-            Log::error("Error al restaurar deuda ID {$orderItem->id}: " . $e->getMessage(), [
-                'error' => $e->getMessage(),
-                'linea' => $e->getLine(),
-                'archivo' => $e->getFile(),
-            ]);
-
-            return redirect()->back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+            Log::error('Error al cancelar producto: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error inesperado.']);
         }
     }
-        
-    
+
+
 
     public function restore(Order $order)
     {

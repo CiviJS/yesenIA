@@ -31,50 +31,60 @@ class OrderService
         });
     }
 
-    public function cancelOrderItem(OrderItem $orderItem){
-           return DB::transaction(function () use ($orderItem) {
+    public function cancelOrderItem(OrderItem $orderItem)
+    {
 
-            $orderItem->delete();
-            
+        return DB::transaction(function () use ($orderItem) {
             ProductRestored::dispatch($orderItem);
+            $orderItem->delete();
         });
     }
 
     public function createOrder(array $data): Order
     {
         return DB::transaction(function () use ($data) {
-            $order = Order::where('client_id', $data['client_id'])->first();
 
-            if (!$order) {
-                $order = Order::create([
-                    'client_id' => $data['client_id'],
-                    'total_amount' => 0,
-                ]);
-            }
+            $order = Order::firstOrCreate(
+                ['client_id' => $data['client_id']],
+                ['total_amount' => 0]
+            );
 
-            $totalAmount = 0;
+            $productIds = collect($data['items'])->pluck('product_id');
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+            $newTotal = 0;
 
             foreach ($data['items'] ?? [] as $item) {
-                $product = Product::findOrFail($item['product_id']);
-                $quantity = (int) $item['quantity'];
-                $unitPrice = (float) ($item['unit_price'] ?? $product->price);
+                $product = $products->get($item['product_id']);
 
+                if (!$product) {
+                    throw new \Exception("Producto no encontrado.");
+                }
+
+                $quantity = (int) $item['quantity'];
+
+                // 3. Validación de stock
+                if ($product->stock < $quantity) {
+                    throw new \Exception("Stock Insuficiente para: {$product->name}");
+                }
+
+                // 4. Crear el ítem
                 $order->items()->create([
                     'product_id' => $product->id,
                     'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
+                    'unit_price' => (float) ($item['unit_price'] ?? $product->price),
                     'orderable_id' => $order->id,
                     'orderable_type' => Order::class,
                 ]);
-                if ($product->stock < $item['quantity']) {
-                    throw new \Exception("Stock Insuficiente para: {$product->name}");
-                }
+
+                // 5. Decrementar stock
                 $product->decrement('stock', $quantity);
 
-                $totalAmount += ($quantity * $unitPrice);
+                $newTotal += ($quantity * ($item['unit_price'] ?? $product->price));
             }
 
-            $order->forceFill(['total_amount' => $totalAmount])->save();
+            // 6. Actualizar el total (Sumando a lo que ya existía si la orden ya tenía deuda)
+            $order->increment('total_amount', $newTotal);
 
             return $order;
         });
