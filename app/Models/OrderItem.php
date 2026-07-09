@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderItem extends Model
 {
+    use SoftDeletes;
     protected $casts = [
         'quantity' => 'integer',
         'unit_price' => 'decimal:2'
@@ -24,6 +25,10 @@ class OrderItem extends Model
     public function orderable()
     {
         return $this->morphTo();
+    }
+    public function getStatus()
+    {
+        return !$this->trashed();
     }
 
 }

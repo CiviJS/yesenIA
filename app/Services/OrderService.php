@@ -4,30 +4,52 @@ namespace App\Services;
 
 use App\Events\OrderCancelled;
 use App\Events\OrderRestored;
+use App\Events\ProductCancelled;
+use App\Events\ProductRestored;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+
 
 class OrderService
 {
     public function getOrders(int $perPage = 10): LengthAwarePaginator
     {
         return Order::with(['client', 'items.product'])
-            ->withTrashed() 
+            ->withTrashed()
             ->latest()
             ->paginate($perPage);
     }
+
+    public function restoreOrderItem(OrderItem $orderItem)
+    {
+        return DB::transaction(function () use ($orderItem) {
+            $orderItem->restore();
+            ProductCancelled::dispatch($orderItem);
+        });
+    }
+
+    public function cancelOrderItem(OrderItem $orderItem){
+           return DB::transaction(function () use ($orderItem) {
+
+            $orderItem->delete();
+            
+            ProductRestored::dispatch($orderItem);
+        });
+    }
+
     public function createOrder(array $data): Order
     {
         return DB::transaction(function () use ($data) {
             $order = Order::where('client_id', $data['client_id'])->first();
 
-            if(!$order){
+            if (!$order) {
                 $order = Order::create([
-                'client_id' => $data['client_id'],
-                'total_amount' => 0,
-            ]);
+                    'client_id' => $data['client_id'],
+                    'total_amount' => 0,
+                ]);
             }
 
             $totalAmount = 0;
@@ -71,7 +93,7 @@ class OrderService
     {
 
         return DB::transaction(function () use ($order) {
-           $order->restore();
+            $order->restore();
             OrderRestored::dispatch($order);
             return true;
         });

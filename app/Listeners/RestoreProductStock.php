@@ -20,7 +20,7 @@ class RestoreProductStock
                     $item->product->increment('stock', $item->quantity);
                 }
             }
-
+        
             Log::info('Operación cancelada (Soft Deleted), productos restaurados: ' . get_class($event->orderable) . ' ID: ' . $order->id);
         }
     }

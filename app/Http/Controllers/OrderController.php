@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Order\StoreOrderRequest;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -31,13 +32,17 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            
+
             if (url()->previous() === url()->current()) {
                 return redirect()->route('dashboard')->withErrors(['error' => 'Hubo un problema al cargar las deudas.']);
             }
 
             return back()->withErrors(['error' => 'Hubo un problema al cargar las deudas.']);
         }
+    }
+    public function detail(Order $order)
+    {
+        return view('pages.orders.detail', compact('order'));
     }
 
     public function create()
@@ -63,14 +68,27 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            return back()->withInput()->withErrors(['error' => 'Ocurrió un problema al registrar la deuda.']);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un problema al registrar la deuda.']);
+        }
+    }
+
+    //para reestockear los products del orderitem osea la deuda
+    public function restoreOrderItem(OrderItem $orderItem)
+    {
+        try {
+            $this->orderService->restoreOrderItem($orderItem);
+            return redirect()->back()->with('sucess' , 'producto cancelado correctamente');
+        } catch (Exception $e) {
+            Log::error('error al cancelar producto de la deuda');
+            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un problema al cancelar un producto de la deuda.']);
+
         }
     }
 
     public function cancel(Order $order)
     {
         try {
-    
+
             if (!$order->getStatus()) {
                 return redirect()->route('orders.index')->with('error', 'La deuda ya estaba cancelada o no existe.');
             }
@@ -84,9 +102,32 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            return back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+            return redirect()->back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
         }
     }
+
+    //para restaurar los productos del order item
+    public function cancelOrderItem(OrderItem $orderItem)
+    {
+        try {
+            if ($orderItem->getStatus()) {
+                return redirect()->route('orders.index')->with('errors', 'La deuda no se puede restaurar en este momento.');
+            }
+
+            $this->orderService->cancelOrderItem($orderItem);
+            return back()->with('success' , 'producto restaurado correctamente');
+        } catch (Exception $e) {
+            Log::error("Error al restaurar deuda ID {$orderItem->id}: " . $e->getMessage(), [
+                'error' => $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => $e->getFile(),
+            ]);
+
+            return redirect()->back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+        }
+    }
+        
+    
 
     public function restore(Order $order)
     {
@@ -95,10 +136,8 @@ class OrderController extends Controller
             if ($order->getStatus()) {
                 return redirect()->route('orders.index')->with('error', 'La deuda no se puede restaurar en este momento.');
             }
+            $this->orderService->restoreOrder($order);
 
-           $this->orderService->restoreOrder($order);
-
-          
             return redirect()->route('orders.index')->with('success', 'Deuda restaurada correctamente.');
         } catch (Exception $e) {
             Log::error("Error al restaurar deuda ID {$order->id}: " . $e->getMessage(), [
@@ -107,7 +146,7 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            return back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+            return redirect()->back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
         }
     }
 }

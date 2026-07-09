@@ -10,13 +10,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
+    
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained('orders'); // El abono es solo para deudas
             $table->decimal('amount', 10, 2); 
             $table->string('payment_method');
-            $table->timestamp('payment_date');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

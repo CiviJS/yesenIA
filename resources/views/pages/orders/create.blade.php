@@ -16,7 +16,8 @@
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <flux:heading size="xl" level="1">{{ __('Registrar deuda') }}</flux:heading>
-                <flux:subheading>{{ __('Selecciona el cliente y los productos para crear una deuda.') }}</flux:subheading>
+                <flux:subheading>{{ __('Selecciona el cliente y los productos para crear una deuda.') }}
+                </flux:subheading>
             </div>
             <flux:button :href="route('orders.index')" variant="primary" wire:navigate>
                 {{ __('Ir a deudas') }}
@@ -47,7 +48,8 @@
                         <flux:select name="items[0][product_id]" label="{{ __('Producto') }}" required>
                             <flux:select.option value="">{{ __('Selecciona un producto') }}</flux:select.option>
                             @foreach ($products as $product)
-                                <flux:select.option value="{{ $product->id }}" :selected="old('items.0.product_id') == $product->id">
+                                <flux:select.option value="{{ $product->id }}"
+                                    :selected="old('items.0.product_id') == $product->id">
                                     {{ $product->name }} - quedan: {{ number_format($product->stock, 0, ',', '.') }}
                                 </flux:select.option>
                             @endforeach
@@ -59,7 +61,8 @@
                     </div>
 
                     <div>
-                        <flux:input name="items[0][quantity]" label="{{ __('Cantidad') }}" type="number" min="1" value="{{ old('items.0.quantity', 1) }}" required />
+                        <flux:input name="items[0][quantity]" label="{{ __('Cantidad') }}" type="number" min="1"
+                            value="{{ old('items.0.quantity', 1) }}" required />
 
                         @error('items.0.quantity')
                             <flux:description class="text-red-500">{{ $message }}</flux:description>

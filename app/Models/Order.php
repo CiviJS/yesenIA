@@ -22,7 +22,7 @@ class Order extends Model
     }
     public function items()
     {
-        return $this->morphMany(OrderItem::class, 'orderable');
+        return $this->morphMany(OrderItem::class, 'orderable')->withTrashed();
     }
     public function payments()
     {
