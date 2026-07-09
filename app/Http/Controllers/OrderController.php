@@ -4,17 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Order\StoreOrderRequest;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\OrderService;
+use App\Services\ClientService; // Asegúrate de importar esto
+use App\Services\ProductService;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    protected OrderService $orderService;
-
-    public function __construct(OrderService $orderService)
-    {
-        $this->orderService = $orderService;
+    public function __construct(
+        protected OrderService $orderService,
+        protected ClientService $clientService,
+        protected ProductService $productService
+    ) {
     }
 
     public function index()
@@ -31,7 +34,7 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            
+
             if (url()->previous() === url()->current()) {
                 return redirect()->route('dashboard')->withErrors(['error' => 'Hubo un problema al cargar las deudas.']);
             }
@@ -39,15 +42,18 @@ class OrderController extends Controller
             return back()->withErrors(['error' => 'Hubo un problema al cargar las deudas.']);
         }
     }
+    public function detail(Order $order)
+    {
+        return view('pages.orders.detail', compact('order'));
+    }
 
     public function create()
     {
-
-        //ojo con esto xd , convertirlo a inyecicon de dependencias 
-        $clients = app(\App\Services\ClientService::class)->getClients(100);
-        $products = app(\App\Services\ProductService::class)->getProducts();
-
-        return view('pages.orders.create', compact('clients', 'products'));
+ 
+        return view('pages.orders.create', [
+            'clients' => $this->clientService->getClients(100),
+            'products' => $this->productService->getProducts()
+        ]);
     }
 
     public function store(StoreOrderRequest $request)
@@ -63,14 +69,27 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            return back()->withInput()->withErrors(['error' => 'Ocurrió un problema al registrar la deuda.']);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un problema al registrar la deuda.']);
+        }
+    }
+
+    //para reestockear los products del orderitem osea la deuda
+    public function restoreOrderItem(OrderItem $orderItem)
+    {
+        try {
+            $this->orderService->restoreOrderItem($orderItem);
+
+            return redirect()->back()->with('success', 'Producto restaurado correctamente.');
+        } catch (Exception $e) {
+            Log::error('Error al restaurar producto: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un problema al restaurar el producto.']);
         }
     }
 
     public function cancel(Order $order)
     {
         try {
-    
+
             if (!$order->getStatus()) {
                 return redirect()->route('orders.index')->with('error', 'La deuda ya estaba cancelada o no existe.');
             }
@@ -84,9 +103,27 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            return back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+            return redirect()->back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
         }
     }
+
+    //para restaurar los productos del order item
+    public function cancelOrderItem(OrderItem $orderItem)
+    {
+        try {
+            if (!$orderItem->getStatus()) {
+                return redirect()->back()->withErrors(['error' => 'El producto ya está cancelado.']);
+            }
+            
+            $this->orderService->cancelOrderItem($orderItem);
+            return back()->with('success', 'Producto cancelado correctamente.');
+        } catch (Exception $e) {
+            Log::error('Error al cancelar producto: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Ocurrió un error inesperado.']);
+        }
+    }
+
+
 
     public function restore(Order $order)
     {
@@ -95,10 +132,8 @@ class OrderController extends Controller
             if ($order->getStatus()) {
                 return redirect()->route('orders.index')->with('error', 'La deuda no se puede restaurar en este momento.');
             }
+            $this->orderService->restoreOrder($order);
 
-           $this->orderService->restoreOrder($order);
-
-          
             return redirect()->route('orders.index')->with('success', 'Deuda restaurada correctamente.');
         } catch (Exception $e) {
             Log::error("Error al restaurar deuda ID {$order->id}: " . $e->getMessage(), [
@@ -107,7 +142,7 @@ class OrderController extends Controller
                 'archivo' => $e->getFile(),
             ]);
 
-            return back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+            return redirect()->back()->with('error', 'Ocurrió un error inesperado. Inténtalo de nuevo.');
         }
     }
 }

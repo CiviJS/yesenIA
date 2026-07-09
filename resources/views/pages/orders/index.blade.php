@@ -1,13 +1,15 @@
 <x-layouts::app :title="__('Deudas')">
     <div class="space-y-8 max-w-6xl mx-auto py-6">
         @if (session('success'))
-            <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-4 rounded-md text-green-700 dark:text-green-400">
+            <div
+                class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-4 rounded-md text-green-700 dark:text-green-400">
                 {{ session('success') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-4 rounded-md text-red-700 dark:text-red-400">
+            <div
+                class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-4 rounded-md text-red-700 dark:text-red-400">
                 <ul class="list-disc pl-5 text-sm">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -56,8 +58,12 @@
                                     <span>{{ $item->quantity }}x {{ $item->product->name ?? 'Producto' }}</span>
                                     <span>${{ number_format($item->unit_price * $item->quantity, 2) }}</span>
                                 </li>
+                                
+                
                             @endforeach
                         </ul>
+
+
                     </div>
 
                     <div class="flex justify-between items-center">
@@ -68,23 +74,31 @@
                     </div>
 
                     <div class="flex justify-end pt-2">
-                      
+                        <flux:button variant="ghost" icon="arrow-path" wire:navigate :href="route('orders.detail', $order)">
+                            {{ __('detalles') }}
+                        </flux:button>
+
                         @if ($order->getStatus())
-                            <form action="{{ route('orders.cancel', $order) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas cancelar esta deuda?');">
+                            <form action="{{ route('orders.cancel', $order) }}" method="POST"
+                                onsubmit="return confirm('¿Seguro que deseas cancelar esta deuda?');">
                                 @csrf @method('DELETE')
-                                <flux:button type="submit" variant="ghost" icon="trash" class="text-red-500">Cancelar</flux:button>
+                                <flux:button type="submit" variant="ghost" icon="trash" class="text-red-500">Cancelar
+                                </flux:button>
                             </form>
 
                         @else
-                            <form action="{{ route('orders.restore', $order) }}" method="POST"  onsubmit="return confirm('¿Seguro que deseas restaurar esta deuda?');">
+                            <form action="{{ route('orders.restore', $order) }}" method="POST"
+                                onsubmit="return confirm('¿Seguro que deseas restaurar esta deuda?');">
                                 @csrf @method('PUT')
-                                <flux:button type="submit" variant="ghost" icon="arrow-path" class="text-green-500">Restaurar</flux:button>
+                                <flux:button type="submit" variant="ghost" icon="arrow-path" class="text-green-500">Restaurar
+                                </flux:button>
                             </form>
                         @endif
                     </div>
                 </flux:card>
             @empty
-                <div class="md:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 p-8 text-center text-zinc-500">
+                <div
+                    class="md:col-span-2 lg:col-span-3 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 p-8 text-center text-zinc-500">
                     No hay deudas registradas por el momento.
                 </div>
             @endforelse
