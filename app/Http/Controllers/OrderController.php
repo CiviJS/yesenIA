@@ -6,7 +6,7 @@ use App\Http\Requests\Order\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\OrderService;
-use App\Services\ClientService; // Asegúrate de importar esto
+use App\Services\ClientService;
 use App\Services\ProductService;
 use Exception;
 use Illuminate\Support\Facades\Log;

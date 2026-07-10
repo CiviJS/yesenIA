@@ -11,7 +11,7 @@
 
 <body class="min-h-screen bg-zinc-50 dark:bg-zinc-900">
 
-    {{-- HEADER PROFESIONAL --}}
+    {{-- HEADER PROFESIONAL --}} 
     <flux:header container
         class="border-b border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
