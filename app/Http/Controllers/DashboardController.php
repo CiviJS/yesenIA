@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -17,19 +18,19 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         try {
-         
+
             $totalDebt = Order::sum('total_amount');
             $totalPaid = Payment::sum('amount');
             $pendingDebt = $totalDebt - $totalPaid;
 
-           
+
             $lowStockProducts = Product::with('category')
                 ->where('stock', '<=', 5)
                 ->orderBy('stock', 'asc')
                 ->take(5)
                 ->get();
 
-          
+
             $topProducts = DB::table('order_items')
                 ->join('products', 'order_items.product_id', '=', 'products.id')
                 ->select('products.name', DB::raw('SUM(order_items.quantity) as total_sold'))
@@ -38,13 +39,19 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
 
-         
+
             $recentPayments = Payment::with(['order.client'])
                 ->orderByDesc('created_at')
                 ->take(5)
                 ->get();
+            $totalSales = Sale::join('order_items', function ($join) {
+                $join->on('sales.id', '=', 'order_items.orderable_id')
+                    ->where('order_items.orderable_type', '=', Sale::class)
+                    ->whereNull('order_items.deleted_at'); // Respeta SoftDeletes de los items
+            })
+                ->whereNull('sales.deleted_at') // Respeta SoftDeletes de las ventas
+                ->sum(DB::raw('order_items.quantity * order_items.unit_price'));
 
-           
             if ($request->has('refresh')) {
                 Cache::forget('gemini_dashboard_report');
             }
@@ -58,6 +65,7 @@ class DashboardController extends Controller
             return view('dashboard.index', compact(
                 'totalDebt',
                 'totalPaid',
+                'totalSales',
                 'pendingDebt',
                 'lowStockProducts',
                 'topProducts',
@@ -114,9 +122,9 @@ class DashboardController extends Controller
                     ],
                     'generationConfig' => [
                         'responseMimeType' => 'application/json',
-                        'temperature' => 0.2, 
-                  
-                        'thinkingConfig' => ['includeThoughts' => false] 
+                        'temperature' => 0.2,
+
+                        'thinkingConfig' => ['includeThoughts' => false]
                     ]
                 ]);
 

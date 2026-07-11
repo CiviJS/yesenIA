@@ -28,7 +28,7 @@
         </div>
 
         {{-- Bloque 1: KPI de Cartera / Deudas (Datos Crudos Optimizados) --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <flux:card class="flex flex-col gap-2">
                 <span
                     class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('Total Deudas Registradas') }}</span>
@@ -50,6 +50,13 @@
                     class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('Cartera Pendiente (Por cobrar)') }}</span>
                 <flux:heading size="xl" class="text-blue-600 dark:text-blue-400">
                     ${{ number_format($pendingDebt, 2) }}
+                </flux:heading>
+            </flux:card>
+            <flux:card class="flex flex-col gap-2">
+                <span
+                    class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('total vendido') }}</span>
+                <flux:heading size="xl" class="text-blue-600 dark:text-blue-400">
+                    ${{ number_format($totalSales, 2) }}
                 </flux:heading>
             </flux:card>
         </div>

@@ -6,10 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'YesenIA' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+     <style>
+        body {
+            /* Ruta de la imagen */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.81)), url('assets/estadero1.png'); 
+
+            background-repeat: no-repeat; 
+  
+            background-position: center center; 
+
+            background-attachment: fixed; 
+     
+            background-size: cover; 
+        }
+    </style>
   
 </head>
 
 <body class="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+
+
 
     {{-- HEADER PROFESIONAL --}} 
     <flux:header container
