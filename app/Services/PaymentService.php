@@ -7,14 +7,20 @@ use App\Models\Payment;
 use App\Models\Order;
 use Log;
 
-class PaymentService {
+class PaymentService
+{
 
-    public function pay(Order $order, array $payment){
-
-        return DB::transaction(function () use ($order, $payment){
+    public function pay(Order $order, array $payment)
+    {
+        return DB::transaction(function () use ($order, $payment) {
             Payment::create($payment);
-            Log::info('descontando ' . $payment['amount'] . ' a ' . $order->total_amount  );
-            $order->decrement('total_amount' , $payment['amount']);
+        });
+    }
+    public function cancelPay(Payment $payment)
+    {
+        return DB::transaction(function () use ($payment) {
+
+            return $payment->delete();
         });
     }
 

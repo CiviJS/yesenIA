@@ -27,6 +27,9 @@ class OrderService
     {
         return DB::transaction(function () use ($orderItem) {
             $orderItem->restore();
+       
+            $orderItem->orderable()->increment('total_amount', (float) $orderItem->unit_price * (float) $orderItem->quantity);
+
             ProductCancelled::dispatch($orderItem);
         });
     }
@@ -36,6 +39,7 @@ class OrderService
 
         return DB::transaction(function () use ($orderItem) {
             ProductRestored::dispatch($orderItem);
+            $orderItem->orderable()->decrement('total_amount', (float) $orderItem->unit_price * (float) $orderItem->quantity);
             $orderItem->delete();
         });
     }
@@ -64,7 +68,7 @@ class OrderService
 
                 $quantity = (int) $item['quantity'];
 
-    
+
                 if ($product->stock < $quantity) {
                     throw new \Exception("Stock Insuficiente para: {$product->name}");
                 }
@@ -82,7 +86,7 @@ class OrderService
                 $newTotal += ($quantity * ($item['unit_price'] ?? $product->price));
             }
 
-            
+
             $order->increment('total_amount', $newTotal);
 
             return $order;

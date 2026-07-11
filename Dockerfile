@@ -1,7 +1,8 @@
 FROM php:8.3-fpm-alpine
 
-RUN apk add --no-cache libpng-dev libzip-dev zip unzip sqlite-dev nodejs npm \
-    && docker-php-ext-install pdo_mysql pdo_sqlite bcmath gd
+# 1. Agregamos postgresql-dev a las dependencias de Alpine
+RUN apk add --no-cache libpng-dev libzip-dev zip unzip sqlite-dev postgresql-dev nodejs npm \
+    && docker-php-ext-install pdo_mysql pdo_sqlite pdo_pgsql bcmath gd
 
 RUN sed -i 's/user = www-data/user = 1000/g' /usr/local/etc/php-fpm.d/www.conf && \
     sed -i 's/group = www-data/group = 1000/g' /usr/local/etc/php-fpm.d/www.conf && \

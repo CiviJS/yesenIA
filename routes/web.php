@@ -7,12 +7,16 @@ use App\Http\Controllers\ProductCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ProductController;
+
+use App\Http\Controllers\DashboardController;
+
+
 Route::view('/', 'welcome')->name('home');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // ==========================================
     // RUTAS LIBRES (GET - Solo lectura)
     // ==========================================
@@ -55,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Pagos
         Route::post('/payments/{order}', [PaymentController::class, 'pay'])->name('payments.pay');
+        Route::delete('/payments/{payment}', [PaymentController::class , 'cancelPay'])->name('payments.cancel');
 
         // Clientes
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');

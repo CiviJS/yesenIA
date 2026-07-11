@@ -43,7 +43,8 @@ class OrderController extends Controller
         }
     }
     public function detail(Order $order)
-    {
+    {   
+        $orderWithPayments = $order->load('payments');
         return view('pages.orders.detail', compact('order'));
     }
 
