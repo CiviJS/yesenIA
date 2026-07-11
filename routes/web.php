@@ -7,7 +7,7 @@ use App\Http\Controllers\ProductCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\ProductController;
-
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\DashboardController;
 
 
@@ -37,7 +37,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/productsCategory', [ProductCategoryController::class, 'index'])->name('products-category.index');
     Route::get('/productsCategory/{productCategory}/edit', [ProductCategoryController::class, 'edit'])->name('products-category.edit');
 
+    Route::get('/limpiar-todo', function () {
+     
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
 
+        return redirect()->back()->with('status', '¡Todo limpio, compae!');
+    })->name('cache.limpiar');
     // ==========================================
     // RUTAS PROTEGIDAS POR MI MIDDELWARE DE IDEMPOTENCIA (POST, PUT, DELETE)
     // ==========================================
@@ -59,7 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Pagos
         Route::post('/payments/{order}', [PaymentController::class, 'pay'])->name('payments.pay');
-        Route::delete('/payments/{payment}', [PaymentController::class , 'cancelPay'])->name('payments.cancel');
+        Route::delete('/payments/{payment}', [PaymentController::class, 'cancelPay'])->name('payments.cancel');
 
         // Clientes
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');

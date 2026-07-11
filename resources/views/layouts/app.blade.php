@@ -6,28 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'YesenIA' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-     <style>
+    <style>
         body {
             /* Ruta de la imagen */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.81)), url('assets/estadero1.png'); 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.81)), url('assets/estadero1.png');
 
-            background-repeat: no-repeat; 
-  
-            background-position: center center; 
+            background-repeat: no-repeat;
 
-            background-attachment: fixed; 
-     
-            background-size: cover; 
+            background-position: center center;
+
+            background-attachment: fixed;
+
+            background-size: cover;
         }
     </style>
-  
+
 </head>
 
 <body class="min-h-screen bg-zinc-50 dark:bg-zinc-900">
 
 
 
-    {{-- HEADER PROFESIONAL --}} 
+    {{-- HEADER PROFESIONAL --}}
     <flux:header container
         class="border-b border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
@@ -60,36 +60,49 @@
 
                 <flux:menu.separator />
 
+                <flux:menu.item icon="bolt" href="{{ route('cache.limpiar') }}"
+                    class="text-amber-500 hover:text-amber-400 font-bold tracking-wide uppercase text-xs">
+                    {{ __('Limpiar Caché de Pruebas') }}
+                </flux:menu.item>
+
+                <flux:menu.separator />
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <flux:menu.item icon="arrow-right-start-on-rectangle" as="button" type="submit">Cerrar sesión
+                    <flux:menu.item icon="arrow-right-start-on-rectangle" as="button" type="submit">
+                        Cerrar sesión
                     </flux:menu.item>
                 </form>
             </flux:menu>
         </flux:dropdown>
     </flux:header>
 
-<flux:sidebar closable stashable class="lg:hidden dark:bg-zinc-900">
-    <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
-    
-    <flux:brand href="#" name="YesenIA" class="px-2" />
+    <flux:sidebar closable stashable class="lg:hidden dark:bg-zinc-900">
+        <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-    <flux:sidebar.nav class="mt-6 ">
-        <flux:sidebar.item icon="home" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:sidebar.item>
-        <flux:sidebar.item icon="user" href="{{ route('clients.index') }}" :current="request()->routeIs('clients.index')">Clientes</flux:sidebar.item>
-        <flux:sidebar.item icon="banknotes" href="{{ route('sales.index') }}" :current="request()->routeIs('sales.index')">Ventas</flux:sidebar.item>
-        <flux:sidebar.item icon="credit-card" href="{{ route('orders.index') }}" :current="request()->routeIs('orders.index')">Deudas</flux:sidebar.item>
-        <flux:sidebar.item icon="beer" href="{{ route('products.index') }}" :current="request()->routeIs('products.index')">Productos</flux:sidebar.item>
-    </flux:sidebar.nav>
-</flux:sidebar>
+        <flux:brand href="#" name="YesenIA" class="px-2" />
+
+        <flux:sidebar.nav class="mt-6 ">
+            <flux:sidebar.item icon="home" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">
+                Dashboard</flux:sidebar.item>
+            <flux:sidebar.item icon="user" href="{{ route('clients.index') }}"
+                :current="request()->routeIs('clients.index')">Clientes</flux:sidebar.item>
+            <flux:sidebar.item icon="banknotes" href="{{ route('sales.index') }}"
+                :current="request()->routeIs('sales.index')">Ventas</flux:sidebar.item>
+            <flux:sidebar.item icon="credit-card" href="{{ route('orders.index') }}"
+                :current="request()->routeIs('orders.index')">Deudas</flux:sidebar.item>
+            <flux:sidebar.item icon="beer" href="{{ route('products.index') }}"
+                :current="request()->routeIs('products.index')">Productos</flux:sidebar.item>
+        </flux:sidebar.nav>
+    </flux:sidebar>
 
 
 
     {{-- CONTENIDO PRINCIPAL (Donde vive la magia) --}}
     <flux:main container class="p-6 lg:p-10">
-        
-            {{ $slot }}
-     
+
+        {{ $slot }}
+
     </flux:main>
 
     @fluxScripts
