@@ -22,20 +22,21 @@
             </flux:card>
         @endif
       
-
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            
             <div>
                 <flux:heading size="xl" level="1">{{ __('Inventario de Productos') }}</flux:heading>
                 <flux:subheading>{{ __('Agrega y administra tus productos desde un panel moderno.') }}</flux:subheading>
             </div>
-                 <flux:button variant="primary" icon="plus" wire:navigate :href="route('products-category.index')">
-                {{ __('Nueva categoria') }}
-            </flux:button>
 
-            <flux:button variant="ghost" wire:navigate :href="route('products.index')">
-                {{ __('Actualizar lista') }}
-            </flux:button>
+            <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+                <flux:button variant="primary" icon="plus" wire:navigate :href="route('products-category.index')">
+                    {{ __('Nueva categoria') }}
+                </flux:button>
+
+                <flux:button variant="ghost" wire:navigate :href="route('products.index')">
+                    {{ __('Actualizar lista') }}
+                </flux:button>
+            </div>
         </div>
 
         <flux:card class="p-6 shadow-sm rounded-xl">
@@ -90,7 +91,7 @@
                                 <flux:table.cell>{{ $product->name }}</flux:table.cell>
                                 <flux:table.cell>
                                     <flux:badge size="xs" color="zinc">{{ $product->category->name ?? __('N/A') }}
-                                    </flux:badge>
+                                        </flux:badge>
                                 </flux:table.cell>
                                 <flux:table.cell>${{ number_format($product->price, 0, ',', '.') }}</flux:table.cell>
                                 <flux:table.cell>
@@ -136,7 +137,6 @@
                                 <flux:badge size="xs" color="zinc" class="mt-1">{{ $product->category->name ?? __('N/A') }}
                                 </flux:badge>
                             </div>
-
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-zinc-500">{{ __('Precio') }}: <span
@@ -158,11 +158,13 @@
                                     {{ __('Eliminar') }}
                                 </flux:button>
                             </form>
+                        </div>
                     </div>
                 @empty
                     <p class="p-4 text-center text-sm text-zinc-500">{{ __('Sin productos.') }}</p>
                 @endforelse
             </div>
+
             <div class="p-4 border-t border-zinc-200 dark:border-zinc-700">
                 {{ $products->links() }}
             </div>
