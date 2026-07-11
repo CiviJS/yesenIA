@@ -18,7 +18,7 @@ class StoreClientRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:100',
-            'phone' => 'required|string|max:20|digits_between:9,20',
+            'phone' => 'nullable|string|max:20|digits_between:9,20',
             'address' => 'nullable|string|max:100'
         ];
     }

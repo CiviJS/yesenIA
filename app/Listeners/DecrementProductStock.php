@@ -9,9 +9,11 @@ class DecrementProductStock
 {
     public function handle(ProductRestored $event): void
     {
-     
         $orderItem = $event->orderItem;
-            \Log::info('producto descontado' . $orderItem);
+        if ($orderItem->orderable()) {
+            $orderItem = $event->orderItem;
+        }
+        \Log::info('producto descontado' . $orderItem);
         $orderItem->product()->decrement('stock', $orderItem->quantity);
     }
 }

@@ -8,7 +8,7 @@ if [ ! -f /var/www/database/database.sqlite ]; then
 fi
 
 
-php artisan migrate:fresh --seed --force
+php artisan migrate --force
 php artisan config:clear
 npm run build
 

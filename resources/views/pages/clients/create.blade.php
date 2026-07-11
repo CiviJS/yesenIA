@@ -52,7 +52,7 @@
                         name="phone" 
                         label="Teléfono" 
                         value="{{ old('phone') }}" 
-                        required
+
                     />
                 </div>
 

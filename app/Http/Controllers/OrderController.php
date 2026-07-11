@@ -43,14 +43,14 @@ class OrderController extends Controller
         }
     }
     public function detail(Order $order)
-    {   
+    {
         $orderWithPayments = $order->load('payments');
         return view('pages.orders.detail', compact('order'));
     }
 
     public function create()
     {
- 
+
         return view('pages.orders.create', [
             'clients' => $this->clientService->getClients(100),
             'products' => $this->productService->getProducts()
@@ -60,8 +60,10 @@ class OrderController extends Controller
     public function store(StoreOrderRequest $request)
     {
         try {
-            $this->orderService->createOrder($request->validated());
-
+            $response = $this->orderService->createOrder($request->validated());
+            if (!$response) {
+                return redirect()->back()->withErrors(['error' => 'Producto no tiene Suficiente stock']);
+            }
             return redirect()->route('orders.index')->with('success', 'Deuda registrada correctamente.');
         } catch (Exception $e) {
             Log::error('Fallo critico al registrar la deuda', [
@@ -115,7 +117,7 @@ class OrderController extends Controller
             if (!$orderItem->getStatus()) {
                 return redirect()->back()->withErrors(['error' => 'El producto ya está cancelado.']);
             }
-            
+
             $this->orderService->cancelOrderItem($orderItem);
             return back()->with('success', 'Producto cancelado correctamente.');
         } catch (Exception $e) {

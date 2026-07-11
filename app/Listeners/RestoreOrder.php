@@ -10,12 +10,13 @@ class RestoreOrder
     public function handle(OrderRestored $event): void
     {
         $orderable = $event->orderable->load('items.product');
-      
-        if (!$orderable->trashed()) {
+
+        if (!$orderable->getStatus()) {
             foreach ($orderable->items as $item) {
+
                 $item->product->decrement('stock', $item->quantity);
+                $item->restore();
             }
         }
-        Log::info('Operación restaurada: ' . get_class($event->orderable) . ' ID: ' . $event->orderable->id);
     }
 }

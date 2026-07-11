@@ -27,25 +27,23 @@ class OrderService
     {
         return DB::transaction(function () use ($orderItem) {
             $orderItem->restore();
-       
-            $orderItem->orderable()->increment('total_amount', (float) $orderItem->unit_price * (float) $orderItem->quantity);
 
-            ProductCancelled::dispatch($orderItem);
+            ProductRestored::dispatch($orderItem);
         });
     }
 
     public function cancelOrderItem(OrderItem $orderItem)
     {
-
         return DB::transaction(function () use ($orderItem) {
-            ProductRestored::dispatch($orderItem);
-            $orderItem->orderable()->decrement('total_amount', (float) $orderItem->unit_price * (float) $orderItem->quantity);
+
+            ProductCancelled::dispatch($orderItem);
+
             $orderItem->delete();
         });
     }
 
     //Corregido : problema de N+1 
-    public function createOrder(array $data): Order
+    public function createOrder(array $data)
     {
         return DB::transaction(function () use ($data) {
 
@@ -63,14 +61,14 @@ class OrderService
                 $product = $products->get($item['product_id']);
 
                 if (!$product) {
-                    throw new \Exception("Producto no encontrado.");
+                    return false;
                 }
 
                 $quantity = (int) $item['quantity'];
 
 
                 if ($product->stock < $quantity) {
-                    throw new \Exception("Stock Insuficiente para: {$product->name}");
+                    return false;
                 }
 
                 $order->items()->create([
@@ -96,8 +94,9 @@ class OrderService
     public function cancelOrder(Order $order): bool
     {
         return DB::transaction(function () use ($order) {
-            $order->delete();
+
             OrderCancelled::dispatch($order);
+              $order->delete();
             return true;
         });
     }
@@ -106,8 +105,9 @@ class OrderService
     {
 
         return DB::transaction(function () use ($order) {
-            $order->restore();
+    
             OrderRestored::dispatch($order);
+            $order->restore();
             return true;
         });
     }

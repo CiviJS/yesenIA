@@ -13,8 +13,10 @@ class IncrementProductStock
      */
     public function handle(ProductCancelled $event): void
     {
-       
         $orderItem = $event->orderItem;
+       if($orderItem->getStatus()){
+        $orderItem = $event->orderItem;
+       }
          \Log::info('producto devuelto' . $orderItem);
 
         $orderItem->product()->increment('stock', $orderItem->quantity);

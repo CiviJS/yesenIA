@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use App\Listeners\RestoreOrderItems;
 use App\Models\Sale;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
@@ -46,20 +47,23 @@ class SaleService
             return false;
         }
         return DB::transaction(function () use ($sale) {
-            $sale->delete();
+
             OrderCancelled::dispatch($sale);
-            return true; 
+            $sale->delete();
+            return true;
         });
-      
+
     }
 
-    public function restore(Sale $sale):bool
+    public function restore(Sale $sale): bool
     {
-         if (!$sale->trashed()) return false;
-         
+        if (!$sale->trashed())
+            return false;
+
         return DB::transaction(function () use ($sale) {
-            $sale->restore();
+
             OrderRestored::dispatch($sale);
+            $sale->restore();
             return true;
         });
 
