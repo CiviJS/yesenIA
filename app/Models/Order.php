@@ -39,7 +39,7 @@ class Order extends Model
         return !$this->trashed();
     }
 
-  
+
     protected function paidAmount(): Attribute
     {
         return Attribute::make(
@@ -47,7 +47,13 @@ class Order extends Model
         );
     }
 
-  
+    protected function totalAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->items->whereNull('deleted_at')->sum(fn($item) => $item->unit_price * $item->quantity),
+        );
+    }
+
     protected function remainingAmount(): Attribute
     {
         return Attribute::make(

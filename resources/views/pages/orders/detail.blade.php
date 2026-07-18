@@ -55,9 +55,9 @@
                     <p class="text-zinc-600 dark:text-zinc-400 mt-1">{{ $order->created_at->format('d/m/Y H:i') }}</p>
                 </div>
                 <div class="sm:text-right">
-                    <flux:subheading>{{ __('Monto rinicial de deuda') }}</flux:subheading>
+                    <flux:subheading>{{ __('Monto inicial de deuda') }}</flux:subheading>
                     <p class="text-zinc-800 dark:text-zinc-200 font-semibold mt-1">
-                        ${{ number_format($order->total_amount, 2) }}</p>
+                        ${{ number_format($order->totalAmount, 2) }}</p>
                 </div>
             </div>
 

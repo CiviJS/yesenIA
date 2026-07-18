@@ -7,7 +7,7 @@ use App\Services\SaleService;
 use App\Services\ProductService;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Mockery\Expectation;
+use Illuminate\Support\Str;
 use App\Models\Sale;
 class SaleController extends Controller
 {
@@ -22,7 +22,6 @@ class SaleController extends Controller
     {
         try {
             $sales = $this->saleService->GetSales();
-
 
             return view('pages.sales.index', compact('sales'));
 
@@ -47,6 +46,9 @@ class SaleController extends Controller
             $this->saleService->createSale($request->validated());
             return redirect()->route('sales.index')->with('success', 'Venta registrada correctamente');
         } catch (Exception $e) {
+            if (Str::contains($e->getMessage(), 'Stock Insuficiente para')) {
+                return back()->withInput()->withErrors(['error' => $e->getMessage()]);
+            }
             return back()->withInput()->withErrors(['error' => 'hubo un problema al crear al registrar la venta']);
         }
     }

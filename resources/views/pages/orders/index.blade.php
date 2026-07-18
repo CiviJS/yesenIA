@@ -53,14 +53,18 @@
 
                         <flux:subheading size="sm">{{ __('Detalle') }}</flux:subheading>
                         <ul class="text-sm text-zinc-600 dark:text-zinc-400">
-                            @foreach($order->items as $item)
+                            @foreach($order->items->take(5) as $item)
                                 <li class="flex justify-between">
                                     <span>{{ $item->quantity }}x {{ $item->product->name ?? 'Producto' }}</span>
                                     <span>${{ number_format($item->unit_price * $item->quantity, 2) }}</span>
-                                </li>
-                                
-                
+                                </li>            
+                                  @if($loop->last && $order->items->count() > 5)
+                                    <li class="text-sm text-gray-500 italic mt-1">
+                                        +{{ $order->items->count() - 5 }} productos más...
+                                    </li>
+                                @endif    
                             @endforeach
+                    
                         </ul>
 
 

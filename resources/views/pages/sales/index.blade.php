@@ -1,23 +1,5 @@
 <x-layouts::app :title="__('Ventas')">
     <div class="space-y-8 max-w-6xl mx-auto py-6">
-        {{-- En lugar de flux:alert --}}
-        @if (session('success'))
-            <div
-                class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-4 rounded-md text-green-700 dark:text-green-400">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div
-                class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-4 rounded-md text-red-700 dark:text-red-400">
-                <ul class="list-disc pl-5 text-sm">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
         {{-- Cabecera --}}
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -54,11 +36,16 @@
                     <div class="space-y-2 border-y border-zinc-200 dark:border-zinc-700 py-3">
                         <flux:subheading size="sm">{{ __('Productos:') }}</flux:subheading>
                         <ul class="text-sm text-zinc-600 dark:text-zinc-400">
-                            @foreach($sale->items as $item)
+                            @foreach($sale->items->take(5) as $item)
                                 <li class="flex justify-between">
                                     <span>{{ $item->quantity }}x {{ $item->product->name }}</span>
                                     <span>${{ number_format($item->unit_price * $item->quantity, 2) }}</span>
                                 </li>
+                                @if($loop->last && $sale->items->count() > 5)
+                                    <li class="text-sm text-gray-500 italic mt-1">
+                                        +{{ $sale->items->count() - 5 }} productos más...
+                                    </li>
+                                @endif
                             @endforeach
                         </ul>
                     </div>

@@ -23,7 +23,7 @@ class SaleService
                     $product = Product::where('id', $item['product_id'])->lockForUpdate()->firstOrFail();
 
                     if ($product->stock < $item['quantity']) {
-                        throw new \Exception("Stock Insuficiente para: {$product->name}");
+                        throw new \Exception("Stock Insuficiente para {$product->name}");
                     }
                     $product->decrement('stock', $item['quantity']);
 
